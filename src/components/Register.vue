@@ -8,10 +8,8 @@
             };
         },
         methods:{
-            async connect(){
-                const user = await this.userService.connect(this.login, this.mail);
-                console.log(user);
-                this.$emit('user', user);
+            connect(){
+                this.userService.connect(this.login, this.mail);
             }
         }
     }

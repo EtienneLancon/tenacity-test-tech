@@ -1,14 +1,14 @@
 import { AbstractHttpService } from './abstract-http.service';
 
 import { Risk } from '@/classes/risk';
-import type { User } from '@/classes/user';
+import type { UserService } from './user.service';
 import type { RiskInterface } from "@/interfaces/risk.interface";
 
 export class RiskService extends AbstractHttpService{
     private list: Risk[] | undefined;
 
-    constructor(user: User){
-        super(user);
+    constructor(userService: UserService){
+        super(userService);
     }
 
     public async getList(): Promise<Risk[]>{
@@ -18,7 +18,7 @@ export class RiskService extends AbstractHttpService{
 
           const response = await super.get("/risk");
           
-          response.data.forEach((item: RiskInterface) => {
+          response?.data.forEach((item: RiskInterface) => {
             list.push(new Risk(item));
           });
 
@@ -32,5 +32,19 @@ export class RiskService extends AbstractHttpService{
       }else{
           return this.list;
       }
+    }
+
+    public updateRisks(risks: RiskInterface[]): Risk[]{
+      if(this.list){
+        risks.forEach((coveredRisk: any) => {
+          for(let risk of this.list){
+            if(coveredRisk?.identifier == risk.identifier){
+              risk.coverage = coveredRisk.coverage;
+            }
+          }
+        });
+        return this.list;
+      }
+      return [];
     }
 }

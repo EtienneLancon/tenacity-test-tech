@@ -1,11 +1,15 @@
 import axios from 'axios';
 
 import { User } from '@/classes/user';
+import { Env } from '@/env/env';
+
+import { Subject, Observable } from 'rxjs';
 
 export class UserService{
     private $http = axios;
     
     private user: User | null = null;
+    private userSubject = new Subject<User | null>();
 
     constructor(){}
 
@@ -13,7 +17,7 @@ export class UserService{
         try{
             const data = {name: name, email: email};
 
-            const response = await this.$http.post("https://technical-test.tools.tenacy.io/register", data);
+            const response = await this.$http.post(Env.baseUrl+'/register', data);
 
             this.user = new User(data);
 
@@ -21,25 +25,53 @@ export class UserService{
 
             window.localStorage.setItem('user', JSON.stringify(this.user));
 
+            this.setUser(this.user);
+
             return this.user;
 
         }catch(error){
             console.log(error);
             return null;
         }
-        
     }
 
-    public getUser(): User | null{
+    public disconnect(): null {
+        window.localStorage.removeItem('user');
+        
+        this.setUser(null);
+
+        return null;
+    }
+
+    public getLocalStorageUser(): User | null{
         const userStr = window.localStorage.getItem('user');
         
         if(userStr)
         {
             const localUser = JSON.parse(userStr);
-            return new User({name: localUser.name, email: localUser.email}).setToken(localUser.token);
+
+            const user = new User({name: localUser.name, email: localUser.email}).setToken(localUser.token);
+
+            this.setUser(user);
+
+            return user;
         }
         else{
+            this.setUser(null);
             return null
         }
+    }
+
+    public listen(): Observable<User |null>{
+        return this.userSubject.asObservable();
+    }
+
+    public setUser(user: User | null): void{
+        this.user = user;
+        this.userSubject.next(user);
+    }
+
+    public getUser(): User | null{
+        return this.user;
     }
 }
