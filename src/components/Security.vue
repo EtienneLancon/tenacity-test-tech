@@ -38,6 +38,7 @@ export default {
         this.listTakenMeasure.push(measure);
         this.listMeasure.splice(this.listMeasure.indexOf(measure), 1);
         this.budget -= measure.cost;
+        this.resetRiskAndScore();
       }
     },
 
@@ -45,6 +46,7 @@ export default {
       this.listMeasure.push(measure);
       this.listTakenMeasure.splice(this.listTakenMeasure.indexOf(measure), 1);
       this.budget += measure.cost;
+      this.resetRiskAndScore();
     },
 
     validateMeasures(){
@@ -57,11 +59,15 @@ export default {
         })
       }
       else{
-        this.score = 0;
+        this.resetRiskAndScore();
+      }
+    },
+
+    resetRiskAndScore(){
+      this.score = 0;
         this.listRisk?.forEach((risk: Risk) =>{
           risk.coverage = 0;
         });
-      }
     },
 
     selectBestMeasures(){
